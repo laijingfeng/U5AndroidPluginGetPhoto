@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">GetPhoto</string>
+    <string name="action_settings">Settings</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="text_view1">textView1</string>
+    <string name="text_view2">textView2</string>
+    <string name="btnCamera">Camera</string>
+    <string name="btnPhoto">Photo</string>
+    <string name="btnPop">Pop</string>
+    <string name="imageView1Desc">ImageView1</string>
+    <string name="imageView2Desc">ImageView2</string>
+
+</resources>
