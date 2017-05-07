@@ -6,7 +6,8 @@ public class Main : MonoBehaviour
 {
     public Button btnCamera;
     public Button btnPhoto;
-    public RawImage img;
+    public Image img;
+    public Text txt;
 
     // Use this for initialization
     void Start()
@@ -24,24 +25,44 @@ public class Main : MonoBehaviour
 
     private void GetPhotoCallback(string fileName)
     {
+        AddLog("GetPhotoCallback " + fileName);
         if (!string.IsNullOrEmpty(fileName))
         {
             this.StartCoroutine(IE_LoadPhoto(fileName));
         }
     }
 
+    private void AddLog(string str)
+    {
+        txt.text += "\n" + str;
+    }
+
     private IEnumerator IE_LoadPhoto(string fileName)
     {
+        AddLog("IE_LoadPhoto " + fileName);
+
         string url = "file://" + Application.persistentDataPath + "/" + fileName;
+
+        AddLog("url = " + url);
+
         WWW www = new WWW(url);
 
         yield return www;
 
         if (www.isDone)
         {
+            AddLog("isDone");
+
             if (www.error == null)
             {
-                img.texture = www.texture;
+                AddLog("size " + www.texture.width + " " + www.texture.height);
+                AddLog("set texture");
+                Sprite sprite = Sprite.Create(www.texture, new Rect(0, 0, www.texture.width, www.texture.height), new Vector2(0.5f, 0.5f));
+                img.sprite = sprite;
+            }
+            else
+            {
+                AddLog(www.error);
             }
         }
 
@@ -50,57 +71,44 @@ public class Main : MonoBehaviour
 
     private void UnityCallAnroid(string methodName, bool isStatic = false, params object[] args)
     {
-        AndroidJavaObject jo = GetAndroidJavaObject;
-        if (jo == null)
+#if UNITY_ANDROID && !UNITY_EDITOR
+        using (AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
         {
-            return;
+            using (AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity"))
+            {
+                if (isStatic)
+                {
+                    jo.CallStatic(methodName, args);
+                }
+                else
+                {
+                    jo.Call(methodName, args);
+                }
+            }
         }
-        if (isStatic)
-        {
-            jo.CallStatic(methodName, args);
-        }
-        else
-        {
-            jo.Call(methodName, args);
-        }
+#endif
     }
 
     private T UnityCallAnroid<T>(string methodName, bool isStatic = false, params object[] args)
     {
         T ret = default(T);
-        AndroidJavaObject jo = GetAndroidJavaObject;
-        if (jo == null)
-        {
-            return ret;
-        }
-        if (isStatic)
-        {
-            ret = jo.CallStatic<T>(methodName, args);
-        }
-        else
-        {
-            ret = jo.Call<T>(methodName, args);
-        }
-        return ret;
-    }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-private AndroidJavaObject _androidJavaObject = null;
-#endif
-    private AndroidJavaObject GetAndroidJavaObject
-    {
-        get
+        using (AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer"))
         {
-#if UNITY_ANDROID && !UNITY_EDITOR
-        if (_androidJavaObject == null)
-        {
-            AndroidJavaClass jc = new AndroidJavaClass("com.unity3d.player.UnityPlayer");
-            _androidJavaObject = jc.GetStatic<AndroidJavaObject>("currentActivity");
+            using (AndroidJavaObject jo = jc.GetStatic<AndroidJavaObject>("currentActivity"))
+            {
+                if (isStatic)
+                {
+                    ret = jo.CallStatic<T>(methodName, args);
+                }
+                else
+                {
+                    ret = jo.Call<T>(methodName, args);
+                }
+            }
         }
-        return _androidJavaObject;
-#else
-            return null;
 #endif
-        }
+        return ret;
     }
 }

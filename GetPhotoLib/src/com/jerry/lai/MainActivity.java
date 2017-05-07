@@ -34,12 +34,13 @@ public class MainActivity extends UnityPlayerActivity {
 		}
 	};
 
-	public final static String path2SaveImg = "/mnt/sdcard/Android/data/jerry.lai.com/files";
+	public static String path2SaveImg = "";
 	public final static String saveImgName = "jerrylai.png";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		path2SaveImg = Environment.getExternalStorageDirectory().getPath() + "/Android/data/com.jerry.lai/files";
 	}
 
 	/*
@@ -175,5 +176,4 @@ public class MainActivity extends UnityPlayerActivity {
 			e.printStackTrace();
 		}
 	}
-
 }
